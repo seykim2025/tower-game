@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <base href="./">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="theme-color" content="#3182F6">
+  <title>타워 쌓기 - 토스 미니게임</title>
+  <link rel="icon" type="image/x-icon" href="./assets/favicon-Cavh6cUP.png">
+  <link rel="stylesheet" href="./mobile-layout.css">
+  <style>
+    @font-face {
+      font-family: 'Black Han Sans';
+      src: url('./assets/BlackHanSans-Regular-XAxCrE-R.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'wenxue';
+      src: url('./assets/wenxue-BRU_-e2p.woff') format('woff'),
+           url('./assets/wenxue-CHof2flc.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    * { margin: 0; padding: 0; }
+    img { width: 100%; }
+    html { background: #fff; height: 100%; }
+    body {
+      font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
+      margin: 0 auto; text-align: center;
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, #E8F3FF 0%, #FFFFFF 100%);
+    }
+    html { font-size: 17.6vh; }
+    #canvas { position: fixed; left: 0; top: 0; right: 0; bottom: 0; margin: auto; }
+    a { text-decoration: none; }
+    li, ol, ul { list-style-type: none; padding: 0; margin: 0; }
+    .hide { display: none; }
+
+    .loading { background-color: #3182F6; height: 100%; width: 100%; }
+    .loading .main { width: 60%; margin: 0 auto; color: #fff; }
+    .loading .main img { width: 60%; margin: 1rem auto 0; }
+    .loading .main .title { font-size: .3rem; }
+    .loading .main .text { font-size: .15rem; }
+    .loading .main .bar { height: .12rem; width: 100%; border: 3px solid #fff; border-radius: .6rem; margin: .1rem 0; }
+    .loading .main .bar .sub { height: .1rem; width: 98%; margin: .008rem auto 0; }
+    .loading .main .bar .percent { height: 100%; width: 0; background-color: #fff; border-radius: .6rem; }
+    .loading .logo { position: absolute; bottom: .3rem; left: 0; right: 0; }
+    .loading .logo img { width: 1rem; }
+
+    .content { height: 100vh; max-width: 480px; margin: 0 auto; position: relative; }
+    .landing .title { width: 60%; }
+    .landing .action-2 { position: absolute; bottom: .2rem; width: 100%; }
+    .landing .start { width: 65%; }
+
+    .modal .mask { background-color: #000; opacity: .6; position: fixed; height: 100%; width: 100%; top: 0; left: 0; }
+    .modal .modal-content { position: fixed; height: 100%; width: 90%; max-width: 480px; left: 50%; transform: translateX(-50%); margin-top: .3rem; top: 0; }
+    .modal .main { width: 85%; margin: 0 auto; }
+    .modal .container { position: relative; }
+    .modal .bg { width: 100%; position: absolute; top: 0; left: 0; }
+    .modal .modal-main { width: 100%; position: absolute; top: 0; left: 0; margin-top: -.4rem; }
+    .modal .over-img { width: 80%; margin: .8rem auto 0; }
+    .modal .over-score { margin-top: -.2rem; font-size: .5rem; color: #ff735c; text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff; }
+    .modal .tip { font-size: .16rem; color: #9b724e; }
+    .modal .over-button-b { width: 70%; margin: .1rem auto 0; }
+
+    /* Korean localized text styles */
+    .ko-title {
+      font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
+      font-size: .45rem;
+      color: #fff;
+      text-shadow: 3px 3px 0 #1b64da, -1px -1px 0 #1b64da, 1px -1px 0 #1b64da, -1px 1px 0 #1b64da;
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+      padding: .3rem 0;
+      width: 80%;
+      margin: 0 auto;
+    }
+    .ko-btn {
+      display: inline-block;
+      font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
+      font-size: .22rem;
+      color: #fff;
+      background: #3182F6;
+      border: 3px solid #fff;
+      border-radius: .6rem;
+      padding: .08rem .4rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+      margin: .05rem 0;
+    }
+    .ko-btn:active { transform: scale(0.95); }
+    .ko-btn.action-grid__primary { display: block; width: 80%; margin: .05rem auto; }
+    .ko-game-over {
+      font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
+      font-size: .32rem;
+      color: #3182F6;
+      text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
+      margin: .6rem auto .1rem;
+    }
+
+    .swing {
+      animation: sw 2s ease-in-out alternate infinite;
+    }
+    @keyframes sw {
+      0% { transform: rotate(5deg); transform-origin: top center; }
+      100% { transform: rotate(-5deg); transform-origin: top center; }
+    }
+  </style>
+  <!-- Toss SDK bridge: exposes window.TossFramework from @apps-in-toss/web-framework -->
+  <script src="./toss-bridge.js"></script>
+  <script src="./life-system.js"></script>
+  <script type="module" crossorigin src="./assets/index-CRgUAfRE.js"></script>
+</head>
+<body>
+  <canvas id="canvas" class="hide"></canvas>
+  <div class="content base-layout" style="padding-bottom: 50px;">
+    <div id="life-ui-container" style="position: absolute; top: 10px; left: 0; right: 0; z-index: 100; font-size: 24px;"></div>
+    <div class="loading">
+      <div class="main">
+        <img src="./assets/main-loading-CPKvSDCZ.gif">
+        <div class="progress">
+          <div class="title">0%</div>
+          <div class="bar"><div class="sub"><div class="percent"></div></div></div>
+          <div class="text">로딩 중...</div>
+        </div>
+      </div>
+    </div>
+    <div class="landing hide">
+      <div class="action-1">
+        <div class="ko-title swing">타워<br>쌓기</div>
+      </div>
+      <div class="action-2">
+        <div id="start" class="ko-btn action-grid__primary hide" style="display:none !important;">시작 (Hidden)</div>
+        <div id="ui-start" class="ko-btn action-grid__primary">시작</div>
+      </div>
+    </div>
+    <a href="./credits.html" style="position:fixed;bottom:8px;right:10px;z-index:9999;font-size:10px;color:rgba(255,255,255,0.5);text-decoration:none;background:rgba(0,0,0,0.2);padding:3px 7px;border-radius:10px;">오픈소스</a>
+    <div id="modal" class="modal hide">
+      <div class="mask"></div>
+      <div class="js-modal-content modal-content">
+        <div class="main">
+          <div class="container">
+            <img src="./assets/main-modal-bg-Vj09WdUN.png" class="bg">
+            <div class="modal-main">
+              <div id="over-modal" class="hide js-modal-card">
+                <div class="ko-game-over">게임 오버</div>
+                <div id="score" class="over-score"></div>
+                <div id="over-zero" class="hide">
+                  <div class="tip">
+                    <p>다시 시도!</p>
+                    <div class="ko-btn js-reload action-grid__primary hide" style="display:none !important;">다시하기 (Hidden)</div>
+                    <div class="ko-btn ui-reload action-grid__primary">다시하기</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Life Modal -->
+    <div id="no-life-modal" class="modal hide">
+      <div class="mask"></div>
+      <div class="js-modal-content modal-content">
+        <div class="main">
+          <div class="container">
+            <div class="modal-main" style="background:#fff; border-radius: 12px; padding: 20px; text-align: center; margin-top: 50%;">
+              <h2 style="color: #333; margin-bottom: 10px; font-family: 'Apple SD Gothic Neo', sans-serif;">하트가 부족해요</h2>
+              <p style="color: #666; margin-bottom: 20px; font-size: 14px;">광고를 보면 하트 3개를 충전할 수 있어요.</p>
+              <div id="btn-watch-ad" class="ko-btn action-grid__primary" style="margin-bottom: 10px;">광고 보고 충전하기</div>
+              <div id="btn-close-no-life" class="ko-btn action-grid__secondary" style="background: #f2f4f6; color: #333; border: none; width: 80%; margin: 0 auto;">닫기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Banner Ad Placeholder -->
+    <div id="banner-ad-placeholder" style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background: #e5e8eb; color: #8b95a1; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 50;">
+      Banner Ad Placeholder
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let state = loadLifeState();
+      state = resetLifeIfNeeded(state);
+      updateLifeUI(state);
+
+      const uiStart = document.getElementById("ui-start");
+      const realStart = document.getElementById("start");
+      const uiReloads = document.querySelectorAll(".ui-reload");
+      const noLifeModal = document.getElementById("no-life-modal");
+      const btnWatchAd = document.getElementById("btn-watch-ad");
+      const btnCloseNoLife = document.getElementById("btn-close-no-life");
+
+      if (uiStart) {
+        uiStart.addEventListener("click", () => {
+          state = loadLifeState();
+          if (canStartGame(state)) {
+            state = consumeLife(state);
+            uiStart.style.display = 'none';
+            if (realStart) realStart.click();
+          } else {
+            noLifeModal.classList.remove("hide");
+          }
+        });
+      }
+
+      if (uiReloads) {
+        uiReloads.forEach(btn => {
+          btn.addEventListener("click", () => {
+            state = loadLifeState();
+            if (canStartGame(state)) {
+              state = consumeLife(state);
+              const e = new URL(window.location.href);
+              e.searchParams.set("s", Date.now());
+              window.location.href = e.toString();
+            } else {
+              noLifeModal.classList.remove("hide");
+            }
+          });
+        });
+      }
+
+      if (btnWatchAd) {
+        btnWatchAd.addEventListener("click", async () => {
+          btnWatchAd.textContent = "충전 중...";
+          const result = await showRewardAdForLifeRecharge();
+          if (result === 'completed') {
+            state = loadLifeState();
+            state = rechargeLifeFromRewardAd(state);
+            noLifeModal.classList.add("hide");
+          }
+          btnWatchAd.textContent = "광고 보고 충전하기";
+        });
+      }
+
+      if (btnCloseNoLife) {
+        btnCloseNoLife.addEventListener("click", () => {
+          noLifeModal.classList.add("hide");
+        });
+      }
+    });
+  </script>
+</body>
+</html>
