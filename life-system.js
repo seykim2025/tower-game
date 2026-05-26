@@ -79,23 +79,53 @@ function updateLifeUI(state) {
     heart.style.fontSize = "24px";
     heart.style.margin = "0";
     if (i < state.lifeCount) {
-      heart.textContent = "❤️";
+      heart.textContent = "⚡";
+      heart.style.opacity = "1";
+      heart.style.filter = "none";
     } else {
-      heart.textContent = "🤍";
+      heart.textContent = "⚡";
+      heart.style.opacity = "0.3";
+      heart.style.filter = "grayscale(100%)";
     }
     container.appendChild(heart);
   }
 }
 
 // Placeholder for rewarded ad
-async function showRewardAdForLifeRecharge() {
-  // TODO: Replace with Toss rewarded ad SDK integration
-  console.log("[Ad Placeholder] Showing rewarded ad...");
+function showRewardAdForLifeRecharge() {
+  // TODO: Replace with real Toss rewarded ad integration
+  console.log("[Ad Placeholder] Showing rewarded ad overlay...");
   return new Promise((resolve) => {
-    setTimeout(() => {
-      // Simulate completed ad
-      console.log("[Ad Placeholder] Ad completed.");
+    const adOverlay = document.getElementById("reward-ad-overlay");
+    const btnSuccess = document.getElementById("btn-simulate-ad-success");
+    const btnClose = document.getElementById("btn-simulate-ad-close");
+    
+    if (!adOverlay) {
       resolve('completed');
-    }, 1500);
+      return;
+    }
+    
+    adOverlay.classList.remove("hide");
+    
+    const cleanup = () => {
+      btnSuccess.removeEventListener("click", onSuccess);
+      btnClose.removeEventListener("click", onClose);
+      adOverlay.classList.add("hide");
+    };
+    
+    const onSuccess = () => {
+      cleanup();
+      console.log("[Ad Placeholder] Ad simulated successfully.");
+      resolve('completed');
+    };
+    
+    const onClose = () => {
+      cleanup();
+      console.log("[Ad Placeholder] Ad closed/cancelled.");
+      resolve('closed');
+    };
+    
+    btnSuccess.addEventListener("click", onSuccess);
+    btnClose.addEventListener("click", onClose);
   });
 }

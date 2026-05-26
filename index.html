@@ -170,9 +170,9 @@
         <div class="main">
           <div class="container">
             <div class="modal-main" style="background:#fff; border-radius: 12px; padding: 20px; text-align: center; margin-top: 50%;">
-              <h2 style="color: #333; margin-bottom: 10px; font-family: 'Apple SD Gothic Neo', sans-serif;">하트가 부족해요</h2>
-              <p style="color: #666; margin-bottom: 20px; font-size: 14px;">광고를 보면 하트 3개를 충전할 수 있어요.</p>
-              <div id="btn-watch-ad" class="ko-btn action-grid__primary" style="margin-bottom: 10px;">광고 보고 충전하기</div>
+              <h2 style="color: #333; margin-bottom: 10px; font-family: 'Apple SD Gothic Neo', sans-serif;">플레이 기회가 부족해요</h2>
+              <p style="color: #666; margin-bottom: 20px; font-size: 14px;">광고를 보면 번개 3개를 충전할 수 있어요.</p>
+              <div id="btn-watch-ad" class="ko-btn action-grid__primary" style="margin-bottom: 10px;">광고 보기</div>
               <div id="btn-close-no-life" class="ko-btn action-grid__secondary" style="background: #f2f4f6; color: #333; border: none; width: 80%; margin: 0 auto;">닫기</div>
             </div>
           </div>
@@ -183,6 +183,16 @@
     <!-- Banner Ad Placeholder -->
     <div id="banner-ad-placeholder" style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background: #e5e8eb; color: #8b95a1; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 50;">
       Banner Ad Placeholder
+    </div>
+    
+    <!-- Reward Ad Placeholder Overlay -->
+    <div id="reward-ad-overlay" class="modal hide" style="z-index: 9999;">
+      <div class="mask" style="background-color: #000; opacity: 0.9;"></div>
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; max-width: 400px;">
+        <h2 style="color: #fff; margin-bottom: 20px;">[임시 광고 화면]</h2>
+        <div id="btn-simulate-ad-success" class="ko-btn action-grid__primary" style="background: #3182F6;">광고 본 걸로 처리하기</div>
+        <div id="btn-simulate-ad-close" class="ko-btn action-grid__secondary" style="margin-top: 10px; color: #fff; border-color: #fff;">닫기</div>
+      </div>
     </div>
   </div>
 
@@ -230,14 +240,12 @@
 
       if (btnWatchAd) {
         btnWatchAd.addEventListener("click", async () => {
-          btnWatchAd.textContent = "충전 중...";
           const result = await showRewardAdForLifeRecharge();
           if (result === 'completed') {
             state = loadLifeState();
             state = rechargeLifeFromRewardAd(state);
             noLifeModal.classList.add("hide");
           }
-          btnWatchAd.textContent = "광고 보고 충전하기";
         });
       }
 
