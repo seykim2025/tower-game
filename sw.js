@@ -1,59 +1,65 @@
-const CACHE_NAME = "tower-game-cache-v2";
+const cacheName = 'js13kPWA-v1';
+const appShellFiles = [
+  './',
+  './index.html',
+  './manifest.json',
+  './mobile-layout.css',
+  './toss-bridge.js',
+  './assets/index-CRgUAfRE.js',
+  './assets/favicon-Cavh6cUP.png',
+  './assets/main-bg-4moCKXOc.png',
+  './assets/main-loading-CPKvSDCZ.gif',
+  './assets/main-modal-bg-Vj09WdUN.png',
+  './assets/BlackHanSans-Regular-XAxCrE-R.ttf',
+  './assets/wenxue-BRU_-e2p.woff',
+  './assets/wenxue-CHof2flc.ttf'
+];
 
-self.addEventListener("install", (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        "./",
-        "./index.html",
-        "./manifest.json",
-        "./assets/favicon-Cavh6cUP.png"
-      ]).catch(err => console.error("Cache addAll error:", err));
-    })
-  );
+self.addEventListener('install', (e) => {
+  console.log('[Service Worker] Install');
+  e.waitUntil((async () => {
+    const cache = await caches.open(cacheName);
+    console.log('[Service Worker] Caching all: app shell and content');
+    try {
+      await cache.addAll(appShellFiles);
+    } catch (err) {
+      console.error('[Service Worker] Cache addAll error', err);
+    }
+  })());
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            return caches.delete(name);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
+self.addEventListener('fetch', (e) => {
+  if (!e.request.url.startsWith('http')) return;
 
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || !event.request.url.startsWith("http")) {
-    return;
-  }
-  
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
+  e.respondWith((async () => {
+    const r = await caches.match(e.request);
+    console.log(`[Service Worker] Fetching resource: ${e.request.url}`);
+    if (r) { return r; }
+    
+    try {
+      const response = await fetch(e.request);
+      const cache = await caches.open(cacheName);
+      console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
+      cache.put(e.request, response.clone());
+      return response;
+    } catch (error) {
+      if (e.request.mode === 'navigate' || (e.request.headers.get('accept') && e.request.headers.get('accept').includes('text/html'))) {
+        const cachedHtml = await caches.match('./index.html');
+        return cachedHtml || new Response('<html><body>Offline</body></html>', { status: 200, headers: { 'Content-Type': 'text/html' }});
       }
-      return fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-        }
-        return networkResponse;
-      }).catch(() => {
-        if (event.request.mode === "navigate" || (event.request.headers.get("accept") && event.request.headers.get("accept").includes("text/html"))) {
-          return caches.match("./index.html").then((html) => {
-            return html || new Response("<html><body>Offline</body></html>", { status: 200, headers: { "Content-Type": "text/html" } });
-          });
-        }
-        return new Response("", { status: 200 });
-      });
-    })
-  );
+      return new Response('', { status: 200, statusText: 'OK' });
+    }
+  })());
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(caches.keys().then((keyList) => {
+    return Promise.all(keyList.map((key) => {
+      if (key !== cacheName) {
+        return caches.delete(key);
+      }
+    }));
+  }));
 });
 
 // PWA Builder compliance for Push Notifications
