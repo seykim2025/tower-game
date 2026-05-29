@@ -14,7 +14,7 @@
   "description": "토스 타워 쌓기 미니게임",
   "lang": "ko",
   "dir": "ltr",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": ["tabbed", "window-controls-overlay", "standalone"],
