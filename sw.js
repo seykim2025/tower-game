@@ -16,6 +16,7 @@ const appShellFiles = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   console.log('[Service Worker] Install');
   e.waitUntil((async () => {
     const cache = await caches.open(cacheName);
@@ -59,7 +60,7 @@ self.addEventListener('activate', (e) => {
         return caches.delete(key);
       }
     }));
-  }));
+  }).then(() => self.clients.claim()));
 });
 
 // PWA Builder compliance for Push Notifications
