@@ -3,6 +3,8 @@
   "name": "Tower Game",
   "short_name": "Tower",
   "description": "토스 타워 쌓기 미니게임",
+  "lang": "ko",
+  "dir": "ltr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -14,6 +16,19 @@
   "prefer_related_applications": false,
   "related_applications": [],
   "iarc_rating_id": "e",
+  "scope_extensions": [
+    {
+      "origin": "https://*.toss.im"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./index.html",
+      "accept": {
+        "text/plain": [".txt"]
+      }
+    }
+  ],
   "icons": [
     {
       "src": "./assets/favicon-Cavh6cUP.png",
