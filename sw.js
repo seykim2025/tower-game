@@ -26,11 +26,12 @@ self.addEventListener("fetch", (event) => {
           return fetchResponse;
         });
       }).catch(() => {
-        return new Response("Offline", { 
-          status: 503, 
-          statusText: "Service Unavailable",
-          headers: new Headers({ "Content-Type": "text/plain" })
-        });
+        if (event.request.mode === 'navigate' || (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
+          return caches.match('./index.html').then((cachedHtml) => {
+            return cachedHtml || new Response("<html><body>Offline</body></html>", { status: 200, headers: { "Content-Type": "text/html" } });
+          });
+        }
+        return new Response("", { status: 200, statusText: "OK" });
       });
     })
   );
