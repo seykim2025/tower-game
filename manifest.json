@@ -11,7 +11,7 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "window-controls-overlay"],
+  "display_override": ["standalone", "window-controls-overlay", "tabbed"],
   "orientation": "portrait",
   "background_color": "#f95240",
   "theme_color": "#f95240",
@@ -44,6 +44,37 @@
           "sizes": "582x582"
         }
       ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "widgets": [
+    {
+      "name": "Tower Widget",
+      "short_name": "Tower",
+      "description": "Widget for Tower Game",
+      "tag": "tower",
+      "template_url": "./index.html",
+      "ms_ac_template": "./index.html",
+      "data": "./index.html",
+      "type": "application/json"
+    }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+tower",
+      "url": "./index.html?action=%s"
     }
   ],
   "icons": [
