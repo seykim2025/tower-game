@@ -29,6 +29,20 @@
       }
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Play Game",
+      "short_name": "Play",
+      "description": "Start playing Tower Game",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "./assets/favicon-Cavh6cUP.png",
+          "sizes": "582x582"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "./assets/favicon-Cavh6cUP.png",
