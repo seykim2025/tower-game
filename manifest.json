@@ -1,4 +1,7 @@
 {
+  "tab_strip": {
+    "home_tab": "auto"
+  },
   "launch_handler": {
     "client_mode": "auto"
   },

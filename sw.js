@@ -7,13 +7,14 @@ self.addEventListener("install", (event) => {
         "./",
         "./index.html",
         "./manifest.json"
-      ]);
+      ]).catch(err => console.error("Cache addAll error:", err));
     })
   );
 });
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  if (!event.request.url.startsWith('http')) return;
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
