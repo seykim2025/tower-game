@@ -14,7 +14,7 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "window-controls-overlay", "tabbed"],
+  "display_override": ["tabbed", "window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "background_color": "#f95240",
   "theme_color": "#f95240",
