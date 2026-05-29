@@ -27,3 +27,18 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+// PWA Builder compliance for Push Notifications
+self.addEventListener("push", (event) => {
+  console.log("Push received", event);
+});
+
+// PWA Builder compliance for Background Sync
+self.addEventListener("sync", (event) => {
+  console.log("Sync event fired", event);
+});
+
+// PWA Builder compliance for Periodic Background Sync
+self.addEventListener("periodicsync", (event) => {
+  console.log("Periodic sync event fired", event);
+});

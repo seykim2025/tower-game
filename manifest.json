@@ -1,4 +1,7 @@
 {
+  "note_taking": {
+    "new_note_url": "./index.html"
+  },
   "id": "toss-tower-game",
   "name": "Tower Game",
   "short_name": "Tower",
