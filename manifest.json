@@ -1,23 +1,34 @@
 {
+  "id": "toss-tower-game",
   "name": "Tower Game",
   "short_name": "Tower",
   "description": "토스 타워 쌓기 미니게임",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f95240",
   "theme_color": "#f95240",
+  "categories": ["game", "entertainment"],
   "icons": [
     {
       "src": "./assets/favicon-Cavh6cUP.png",
-      "sizes": "192x192",
+      "sizes": "582x582",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./assets/favicon-Cavh6cUP.png",
+      "sizes": "582x582",
+      "type": "image/png",
+      "form_factor": "narrow"
     },
     {
       "src": "./assets/favicon-Cavh6cUP.png",
-      "sizes": "512x512",
+      "sizes": "582x582",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "wide"
     }
   ]
 }
