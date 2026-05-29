@@ -1,4 +1,7 @@
 {
+  "launch_handler": {
+    "client_mode": "auto"
+  },
   "note_taking": {
     "new_note_url": "./index.html"
   },
