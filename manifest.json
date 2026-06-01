@@ -11,7 +11,7 @@
   "id": "toss-tower-game",
   "name": "타워쌓기",
   "short_name": "타워쌓기",
-  "description": "토스 타워 쌓기 미니게임",
+  "description": "타워쌓기",
   "lang": "ko",
   "dir": "ltr",
   "start_url": "./",
