@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <base href="./">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
   <meta name="theme-color" content="#f95240">
   <title>타워 쌓기 - 토스 미니게임</title>
   <link rel="icon" type="image/x-icon" href="./assets/favicon-Cavh6cUP.png">
@@ -23,46 +23,96 @@
       font-weight: normal;
       font-style: normal;
     }
-    * { margin: 0; padding: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     img { width: 100%; }
-    html { background: #fff; height: 100%; }
-    body {
-      font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
-      margin: 0 auto; text-align: center;
-      width: 100%; height: 100%;
+    
+    html, body {
+      height: 100%;
       background: #f95240 url(./assets/main-bg-4moCKXOc.png);
+      font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
       overflow: hidden;
     }
     html { font-size: 17.6vh; }
-    /* Adjusted bottom to 80px to make room for banner ad */
-    #canvas { position: fixed; left: 0; top: 0; right: 0; bottom: 80px; margin: auto; }
+
+    /* Layout wrapper to safely reserve bottom space without overlap */
+    .app-wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .content-area {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ad placeholders */
+    .ad-placeholder {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e0e0e0;
+      color: #757575;
+      font-size: 12px;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    
+    .bottom-banner-container {
+      flex-shrink: 0;
+      width: 100%;
+      height: 80px;
+      padding-bottom: env(safe-area-inset-bottom);
+      box-sizing: content-box;
+      background-color: #e0e0e0;
+      border-top: 1px solid #ccc;
+    }
+    
+    .gameover-image-ad {
+      height: 60px;
+      margin: 10px auto;
+      border-radius: 8px;
+    }
+
+    #canvas { 
+      position: absolute; 
+      left: 0; top: 0; right: 0; bottom: 0; 
+      margin: auto; 
+    }
+    
     a { text-decoration: none; }
     li, ol, ul { list-style-type: none; padding: 0; margin: 0; }
     .hide { display: none !important; }
 
-    .loading { background-color: #f05a50; height: 100%; width: 100%; }
-    .loading .main { width: 60%; margin: 0 auto; color: #fff; }
+    .loading { background-color: #f05a50; height: 100%; width: 100%; position: absolute; z-index: 10; }
+    .loading .main { width: 60%; margin: 0 auto; color: #fff; text-align: center; }
     .loading .main img { width: 60%; margin: 1rem auto 0; }
     .loading .main .title { font-size: .3rem; }
     .loading .main .text { font-size: .15rem; }
     .loading .main .bar { height: .12rem; width: 100%; border: 3px solid #fff; border-radius: .6rem; margin: .1rem 0; }
     .loading .main .bar .sub { height: .1rem; width: 98%; margin: .008rem auto 0; }
     .loading .main .bar .percent { height: 100%; width: 0; background-color: #fff; border-radius: .6rem; }
-    .loading .logo { position: absolute; bottom: .3rem; left: 0; right: 0; }
+    .loading .logo { position: absolute; bottom: .3rem; left: 0; right: 0; text-align: center; }
     .loading .logo img { width: 1rem; }
 
-    /* Adjusted content height to not overlap with bottom banner */
-    .content { height: calc(100vh - 80px); max-width: 480px; margin: 0 auto; position: relative; }
-    .landing .title { width: 60%; }
-    .landing .action-2 { position: absolute; bottom: .2rem; width: 100%; }
+    .landing { flex: 1; display: flex; flex-direction: column; width: 100%; position: absolute; height: 100%; z-index: 5;}
+    .landing .action-1 { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .landing .action-2 { padding-bottom: 30px; text-align: center; }
     .landing .start { width: 65%; }
 
-    .modal .mask { background-color: #000; opacity: .6; position: fixed; height: 100%; width: 100%; top: 0; left: 0; }
-    .modal .modal-content { position: fixed; height: 100%; width: 90%; max-width: 480px; left: 50%; transform: translateX(-50%); margin-top: .3rem; top: 0; }
+    .modal .mask { background-color: #000; opacity: .6; position: fixed; height: 100%; width: 100%; top: 0; left: 0; z-index: 20;}
+    .modal .modal-content { position: absolute; height: 100%; width: 90%; max-width: 480px; left: 50%; transform: translateX(-50%); top: 0; display: flex; flex-direction: column; justify-content: center; z-index: 21;}
     .modal .main { width: 85%; margin: 0 auto; }
     .modal .container { position: relative; }
     .modal .bg { width: 100%; position: absolute; top: 0; left: 0; }
-    .modal .modal-main { width: 100%; position: absolute; top: 0; left: 0; margin-top: -.4rem; }
+    .modal .modal-main { width: 100%; position: absolute; top: 0; left: 0; margin-top: -.4rem; text-align: center; }
     .modal .over-img { width: 80%; margin: .8rem auto 0; }
     .modal .over-score { margin-top: -.2rem; font-size: .5rem; color: #ff735c; text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff; }
     .modal .tip { font-size: .16rem; color: #9b724e; }
@@ -79,6 +129,7 @@
       padding: .3rem 0;
       width: 80%;
       margin: 0 auto;
+      text-align: center;
     }
     .ko-btn {
       display: inline-block;
@@ -93,10 +144,11 @@
       text-decoration: none;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       transition: transform 0.1s;
-      margin: .05rem 0;
+      margin: .05rem auto;
+      text-align: center;
     }
     .ko-btn:active { transform: scale(0.95); }
-    .ko-btn.action-grid__primary { display: block; width: 80%; margin: .05rem auto; }
+    .ko-btn.action-grid__primary { display: block; width: 80%; }
     
     #rewarded-retry {
       background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
@@ -118,27 +170,12 @@
       0% { transform: rotate(5deg); transform-origin: top center; }
       100% { transform: rotate(-5deg); transform-origin: top center; }
     }
-
-    /* Ad placeholders */
-    .ad-placeholder {
-      width: 100%;
-      height: 80px;
-    }
-    .bottom-banner-container {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      height: 80px;
-      z-index: 9999;
-      background-color: #e0e0e0;
-    }
-    .gameover-image-ad {
-      width: 80%;
-      height: 60px;
-      margin: 10px auto;
-      border-radius: 8px;
+    
+    .attempts-status {
+      font-size: .18rem;
+      color: #fff;
+      margin-bottom: 10px;
+      text-shadow: 1px 1px 0 #d4442e;
     }
   </style>
 
@@ -146,11 +183,10 @@
   <script src="./toss-ads.js"></script>
 
   <script>
-    // Initialize heart economy from sessionStorage
-    const storedHearts = sessionStorage.getItem('currentStartHearts');
-    window.currentStartHearts = storedHearts ? parseInt(storedHearts, 10) : 1;
-    // Clear it so it defaults to 1 for the next session unless explicitly rewarded again
-    sessionStorage.removeItem('currentStartHearts');
+    // Initialize available attempts from sessionStorage
+    const storedAttempts = sessionStorage.getItem('availableAttempts');
+    window.availableAttempts = storedAttempts ? parseInt(storedAttempts, 10) : 1;
+    console.log("[GameState] Available attempts:", window.availableAttempts);
   </script>
 
   <!-- Toss SDK bridge: exposes window.TossFramework from @apps-in-toss/web-framework -->
@@ -158,45 +194,54 @@
   <script type="module" crossorigin src="./assets/index-CRgUAfRE.js"></script>
 </head>
 <body>
-  <canvas id="canvas" class="hide"></canvas>
-  <div class="content base-layout">
-    <div class="loading">
-      <div class="main">
-        <img src="./assets/main-loading-CPKvSDCZ.gif">
-        <div class="progress">
-          <div class="title">0%</div>
-          <div class="bar"><div class="sub"><div class="percent"></div></div></div>
-          <div class="text">로딩 중...</div>
+  <div class="app-wrapper">
+    <div class="content-area base-layout" id="content-area">
+      <canvas id="canvas" class="hide"></canvas>
+      
+      <div class="loading">
+        <div class="main">
+          <img src="./assets/main-loading-CPKvSDCZ.gif">
+          <div class="progress">
+            <div class="title">0%</div>
+            <div class="bar"><div class="sub"><div class="percent"></div></div></div>
+            <div class="text">로딩 중...</div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="landing hide">
-      <div class="action-1">
-        <div class="ko-title swing">타워<br>쌓기</div>
+      
+      <div class="landing hide">
+        <div class="action-1">
+          <div class="ko-title swing">타워<br>쌓기</div>
+        </div>
+        <div class="action-2">
+          <div id="landing-attempts" class="attempts-status">도전 기회: 1</div>
+          <div id="start" class="ko-btn action-grid__primary">시작하기</div>
+          <div id="landing-rewarded" class="ko-btn action-grid__primary hide" style="background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%); font-size: .18rem;">광고 보고 도전 기회 3개 받기</div>
+        </div>
       </div>
-      <div class="action-2">
-        <div id="start" class="ko-btn action-grid__primary">시작</div>
-      </div>
-    </div>
-    <a href="./credits.html" style="position:fixed;bottom:88px;right:10px;z-index:9998;font-size:10px;color:rgba(255,255,255,0.5);text-decoration:none;background:rgba(0,0,0,0.2);padding:3px 7px;border-radius:10px;">오픈소스</a>
-    
-    <div id="modal" class="modal hide">
-      <div class="mask"></div>
-      <div class="js-modal-content modal-content">
-        <div class="main">
-          <div class="container">
-            <img src="./assets/main-modal-bg-Vj09WdUN.png" class="bg">
-            <div class="modal-main">
-              <div id="over-modal" class="hide js-modal-card">
-                <div class="ko-game-over">게임 오버</div>
-                <div id="score" class="over-score"></div>
-                <div id="over-zero" class="hide">
-                  <div class="tip">
-                    <div class="ko-btn id-retry-interstitial action-grid__primary">다시하기</div>
-                    <div class="ko-btn id-retry-rewarded action-grid__primary" id="rewarded-retry">광고 보고 하트 3개 받기</div>
+      
+      <a href="./credits.html" style="position:absolute;bottom:10px;right:10px;z-index:9998;font-size:10px;color:rgba(255,255,255,0.5);text-decoration:none;background:rgba(0,0,0,0.2);padding:3px 7px;border-radius:10px;">오픈소스</a>
+      
+      <div id="modal" class="modal hide">
+        <div class="mask"></div>
+        <div class="js-modal-content modal-content">
+          <div class="main">
+            <div class="container">
+              <img src="./assets/main-modal-bg-Vj09WdUN.png" class="bg">
+              <div class="modal-main">
+                <div id="over-modal" class="hide js-modal-card">
+                  <div class="ko-game-over">게임 오버</div>
+                  <div id="score" class="over-score"></div>
+                  <div id="over-zero" class="hide">
+                    <div class="tip">
+                      <div id="gameover-attempts-text" style="font-size: .2rem; color: #d4442e; font-weight: bold; margin-bottom: 5px;"></div>
+                      
+                      <div id="btn-retry" class="ko-btn id-retry-interstitial action-grid__primary">다시하기</div>
+                      <div id="btn-rewarded" class="ko-btn id-retry-rewarded action-grid__primary hide" style="background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%); font-size: .18rem;">광고 보고 도전 기회 3개 받기</div>
+                    </div>
+                    <!-- Game Over Lower Image Ad -->
+                    <div id="gameover_bottom_image_ad" class="ad-placeholder gameover-image-ad"></div>
                   </div>
-                  <!-- Game Over Lower Image Ad -->
-                  <div id="gameover_bottom_image_ad" class="ad-placeholder gameover-image-ad"></div>
                 </div>
               </div>
             </div>
@@ -204,25 +249,76 @@
         </div>
       </div>
     </div>
+    
+    <!-- Global Bottom Banner Ad Area (Strictly outside content area) -->
+    <div id="global_bottom_banner" class="bottom-banner-container ad-placeholder"></div>
   </div>
 
-  <!-- Global Bottom Banner Ad Area -->
-  <div id="global_bottom_banner" class="bottom-banner-container"></div>
-
   <script>
-    // Adjust canvas height to not overlap with the bottom banner
+    // Initialize banner
     window.TossAds.renderOrReserveBannerAd('global_bottom_banner', 'home_and_ingame_bottom_banner');
     window.TossAds.renderOrReserveBannerAd('gameover_bottom_image_ad', 'gameover_bottom_image_ad');
 
-    // Override the setGameFailed logic from the bundled script
-    // We attach to the native JS load event to override any globals
-    window.addEventListener('load', () => {
-      if (window.TowerGame) {
-        // Find setGameFailed logic. It was hardcoded in the HTML previously, so we'll re-bind it.
-        // Actually, setGameFailed is passed into TowerGame initialization in index-*.js.
-        // Since we cannot easily override it after init, we update the logic in the minified bundle directly.
+    // Update landing UI based on attempts
+    const landingAttemptsEl = document.getElementById('landing-attempts');
+    const startBtn = document.getElementById('start');
+    const landingRewardedBtn = document.getElementById('landing-rewarded');
+    
+    if (window.availableAttempts <= 0) {
+      landingAttemptsEl.textContent = '도전 기회를 모두 썼어요';
+      startBtn.classList.add('hide');
+      landingRewardedBtn.classList.remove('hide');
+    } else {
+      landingAttemptsEl.textContent = `도전 기회: ${window.availableAttempts}`;
+      startBtn.classList.remove('hide');
+      landingRewardedBtn.classList.add('hide');
+    }
+
+    // Landing screen rewarded ad hook
+    landingRewardedBtn.addEventListener('click', async () => {
+      const success = await window.TossAds.showRewardedAd('landing_rewarded_hearts');
+      if (success) {
+        sessionStorage.setItem('availableAttempts', 3);
+        const e = new URL(window.location.href);
+        e.searchParams.set("s", Date.now());
+        window.location.href = e.toString();
       }
     });
+
+    // Start button hook: consumes 1 attempt.
+    // The actual game start is bound to 'start' button in the minified bundle.
+    // We intercept the click visually. The bundle has its own event listener.
+    // It's safe to just decrement here, because if they start, the variable is updated.
+    startBtn.addEventListener('click', () => {
+      if (window.availableAttempts > 0) {
+        window.availableAttempts -= 1;
+        sessionStorage.setItem('availableAttempts', window.availableAttempts);
+        console.log("[GameState] Attempt consumed. Remaining:", window.availableAttempts);
+      }
+    });
+
+    // Update Game Over Modal UI when it is shown.
+    // We observe the modal for changes.
+    const observer = new MutationObserver(() => {
+      if (!document.getElementById('modal').classList.contains('hide')) {
+        const attemptsText = document.getElementById('gameover-attempts-text');
+        const btnRetry = document.getElementById('btn-retry');
+        const btnRewarded = document.getElementById('btn-rewarded');
+        
+        if (window.availableAttempts <= 0) {
+          attemptsText.textContent = '도전 기회를 모두 썼어요';
+          attemptsText.style.color = '#d4442e';
+          btnRetry.classList.add('hide');
+          btnRewarded.classList.remove('hide');
+        } else {
+          attemptsText.textContent = `남은 도전 기회: ${window.availableAttempts}`;
+          attemptsText.style.color = '#fff';
+          btnRetry.classList.remove('hide');
+          btnRewarded.classList.add('hide');
+        }
+      }
+    });
+    observer.observe(document.getElementById('modal'), { attributes: true, attributeFilter: ['class'] });
 
     // Handle Interstitial Retry Hook
     document.querySelectorAll('.id-retry-interstitial').forEach(btn => {
@@ -236,13 +332,13 @@
       });
     });
 
-    // Handle Rewarded Ad Hearts Hook
+    // Handle Rewarded Ad Attempts Hook (Game Over Screen)
     document.querySelectorAll('.id-retry-rewarded').forEach(btn => {
       btn.addEventListener('click', async () => {
         const success = await window.TossAds.showRewardedAd('game_over_rewarded_hearts');
         if (success) {
-          // Grant 3 hearts for the next attempt
-          sessionStorage.setItem('currentStartHearts', 3);
+          // Grant 3 attempts for future play
+          sessionStorage.setItem('availableAttempts', 3);
           const e = new URL(window.location.href);
           e.searchParams.set("s", Date.now());
           window.location.href = e.toString();
