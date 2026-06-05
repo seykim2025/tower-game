@@ -31,12 +31,14 @@
       margin: 0 auto; text-align: center;
       width: 100%; height: 100%;
       background: #f95240 url(./assets/main-bg-4moCKXOc.png);
+      overflow: hidden;
     }
     html { font-size: 17.6vh; }
-    #canvas { position: fixed; left: 0; top: 0; right: 0; bottom: 0; margin: auto; }
+    /* Adjusted bottom to 80px to make room for banner ad */
+    #canvas { position: fixed; left: 0; top: 0; right: 0; bottom: 80px; margin: auto; }
     a { text-decoration: none; }
     li, ol, ul { list-style-type: none; padding: 0; margin: 0; }
-    .hide { display: none; }
+    .hide { display: none !important; }
 
     .loading { background-color: #f05a50; height: 100%; width: 100%; }
     .loading .main { width: 60%; margin: 0 auto; color: #fff; }
@@ -49,7 +51,8 @@
     .loading .logo { position: absolute; bottom: .3rem; left: 0; right: 0; }
     .loading .logo img { width: 1rem; }
 
-    .content { height: 100vh; max-width: 480px; margin: 0 auto; position: relative; }
+    /* Adjusted content height to not overlap with bottom banner */
+    .content { height: calc(100vh - 80px); max-width: 480px; margin: 0 auto; position: relative; }
     .landing .title { width: 60%; }
     .landing .action-2 { position: absolute; bottom: .2rem; width: 100%; }
     .landing .start { width: 65%; }
@@ -94,6 +97,12 @@
     }
     .ko-btn:active { transform: scale(0.95); }
     .ko-btn.action-grid__primary { display: block; width: 80%; margin: .05rem auto; }
+    
+    #rewarded-retry {
+      background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
+      font-size: .18rem;
+    }
+
     .ko-game-over {
       font-family: 'Black Han Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
       font-size: .32rem;
@@ -109,7 +118,41 @@
       0% { transform: rotate(5deg); transform-origin: top center; }
       100% { transform: rotate(-5deg); transform-origin: top center; }
     }
+
+    /* Ad placeholders */
+    .ad-placeholder {
+      width: 100%;
+      height: 80px;
+    }
+    .bottom-banner-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 80px;
+      z-index: 9999;
+      background-color: #e0e0e0;
+    }
+    .gameover-image-ad {
+      width: 80%;
+      height: 60px;
+      margin: 10px auto;
+      border-radius: 8px;
+    }
   </style>
+
+  <!-- Toss Ads Abstraction Layer -->
+  <script src="./toss-ads.js"></script>
+
+  <script>
+    // Initialize heart economy from sessionStorage
+    const storedHearts = sessionStorage.getItem('currentStartHearts');
+    window.currentStartHearts = storedHearts ? parseInt(storedHearts, 10) : 1;
+    // Clear it so it defaults to 1 for the next session unless explicitly rewarded again
+    sessionStorage.removeItem('currentStartHearts');
+  </script>
+
   <!-- Toss SDK bridge: exposes window.TossFramework from @apps-in-toss/web-framework -->
   <script src="./toss-bridge.js"></script>
   <script type="module" crossorigin src="./assets/index-CRgUAfRE.js"></script>
@@ -135,7 +178,8 @@
         <div id="start" class="ko-btn action-grid__primary">시작</div>
       </div>
     </div>
-    <a href="./credits.html" style="position:fixed;bottom:8px;right:10px;z-index:9999;font-size:10px;color:rgba(255,255,255,0.5);text-decoration:none;background:rgba(0,0,0,0.2);padding:3px 7px;border-radius:10px;">오픈소스</a>
+    <a href="./credits.html" style="position:fixed;bottom:88px;right:10px;z-index:9998;font-size:10px;color:rgba(255,255,255,0.5);text-decoration:none;background:rgba(0,0,0,0.2);padding:3px 7px;border-radius:10px;">오픈소스</a>
+    
     <div id="modal" class="modal hide">
       <div class="mask"></div>
       <div class="js-modal-content modal-content">
@@ -148,9 +192,11 @@
                 <div id="score" class="over-score"></div>
                 <div id="over-zero" class="hide">
                   <div class="tip">
-                    <p>다시 시도!</p>
-                    <div class="ko-btn js-reload action-grid__primary">다시하기</div>
+                    <div class="ko-btn id-retry-interstitial action-grid__primary">다시하기</div>
+                    <div class="ko-btn id-retry-rewarded action-grid__primary" id="rewarded-retry">광고 보고 하트 3개 받기</div>
                   </div>
+                  <!-- Game Over Lower Image Ad -->
+                  <div id="gameover_bottom_image_ad" class="ad-placeholder gameover-image-ad"></div>
                 </div>
               </div>
             </div>
@@ -159,5 +205,50 @@
       </div>
     </div>
   </div>
+
+  <!-- Global Bottom Banner Ad Area -->
+  <div id="global_bottom_banner" class="bottom-banner-container"></div>
+
+  <script>
+    // Adjust canvas height to not overlap with the bottom banner
+    window.TossAds.renderOrReserveBannerAd('global_bottom_banner', 'home_and_ingame_bottom_banner');
+    window.TossAds.renderOrReserveBannerAd('gameover_bottom_image_ad', 'gameover_bottom_image_ad');
+
+    // Override the setGameFailed logic from the bundled script
+    // We attach to the native JS load event to override any globals
+    window.addEventListener('load', () => {
+      if (window.TowerGame) {
+        // Find setGameFailed logic. It was hardcoded in the HTML previously, so we'll re-bind it.
+        // Actually, setGameFailed is passed into TowerGame initialization in index-*.js.
+        // Since we cannot easily override it after init, we update the logic in the minified bundle directly.
+      }
+    });
+
+    // Handle Interstitial Retry Hook
+    document.querySelectorAll('.id-retry-interstitial').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const success = await window.TossAds.showInterstitialAd('game_over_retry_interstitial');
+        if (success) {
+          const e = new URL(window.location.href);
+          e.searchParams.set("s", Date.now());
+          window.location.href = e.toString();
+        }
+      });
+    });
+
+    // Handle Rewarded Ad Hearts Hook
+    document.querySelectorAll('.id-retry-rewarded').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const success = await window.TossAds.showRewardedAd('game_over_rewarded_hearts');
+        if (success) {
+          // Grant 3 hearts for the next attempt
+          sessionStorage.setItem('currentStartHearts', 3);
+          const e = new URL(window.location.href);
+          e.searchParams.set("s", Date.now());
+          window.location.href = e.toString();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
