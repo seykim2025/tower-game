@@ -109,6 +109,34 @@
       0% { transform: rotate(5deg); transform-origin: top center; }
       100% { transform: rotate(-5deg); transform-origin: top center; }
     }
+    /* Toss Ads Placeholder Styles */
+    .bottom-banner-slot {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #999;
+      z-index: 1000;
+    }
+    .gameover-image-ad-slot {
+      width: 80%;
+      height: 100px;
+      margin: .2rem auto 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 1px dashed #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      border-radius: 8px;
+    }
   </style>
   <!-- Toss Ads Abstraction Layer -->
   <script src="./toss-ads.js"></script>
@@ -151,6 +179,11 @@
                   <div class="tip">
                     <p>다시 시도!</p>
                     <div class="ko-btn id-retry-interstitial action-grid__primary">다시하기</div>
+                    <div class="ko-btn id-retry-rewarded action-grid__primary" style="margin-top: .15rem;">AD 하트 3개로 다시하기</div>
+                    <div id="gameover-image-ad-slot" class="gameover-image-ad-slot">
+                      TODO: replace with real Toss image/native ad ID
+                      (ait-ad-test-native-image-id)
+                    </div>
                   </div>
                 </div>
               </div>
@@ -160,23 +193,47 @@
       </div>
     </div>
   </div>
+  
+  <!-- Bottom Strip Banner Area -->
+  <div id="bottom-banner-slot" class="bottom-banner-slot">
+    TODO: replace with real Toss banner ad ID
+    (ait-ad-test-banner-id)
+  </div>
+
   <script>
+    // Constants and Heart State
+    const DEFAULT_HEARTS = 1;
+    const REWARDED_HEARTS = 3;
+    
+    window.nextPlayHearts = parseInt(sessionStorage.getItem('rewardedHearts'), 10) || DEFAULT_HEARTS;
+    // Consume the rewarded state immediately so next runs revert to default
+    sessionStorage.removeItem('rewardedHearts');
+
     // Handle Interstitial Retry Hook
     document.querySelectorAll('.id-retry-interstitial').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (window.TossAds && window.TossAds.showInterstitialAd) {
           const success = await window.TossAds.showInterstitialAd('game_over_retry_interstitial');
-          if (success) {
-            const e = new URL(window.location.href);
-            e.searchParams.set("s", Date.now());
-            window.location.href = e.toString();
-          }
-        } else {
-          // Fallback if ad system is not loaded
-          const e = new URL(window.location.href);
-          e.searchParams.set("s", Date.now());
-          window.location.href = e.toString();
+          // Start game anyway since we must not block gameplay
         }
+        const e = new URL(window.location.href);
+        e.searchParams.set("s", Date.now());
+        window.location.href = e.toString();
+      });
+    });
+
+    // Handle Rewarded Hearts Hook
+    document.querySelectorAll('.id-retry-rewarded').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (window.TossAds && window.TossAds.showRewardedAd) {
+          const success = await window.TossAds.showRewardedAd('game_over_rewarded_hearts');
+          if (success) {
+            sessionStorage.setItem('rewardedHearts', REWARDED_HEARTS);
+          }
+        }
+        const e = new URL(window.location.href);
+        e.searchParams.set("s", Date.now());
+        window.location.href = e.toString();
       });
     });
   </script>
